@@ -1,0 +1,71 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: file-server
+  labels:
+    app: file-server
+spec:
+  volumes:
+    - name: task-pv-storage
+      persistentVolumeClaim:
+       claimName: local-claim
+  containers:
+    - name: file-server
+      image: edwardkan/fileserver:latest
+      ports:
+        - containerPort: 22
+          protocol: TCP
+          name: "ssh-server"
+        - containerPort: 445
+          protocol: TCP
+          name: "smbd"
+        - containerPort: 139
+          protocol: TCP
+          name: "netbios"
+        - containerPort: 135
+          protocol: TCP
+          name: "scm"
+        - containerPort: 137
+          protocol: UDP
+          name: "netbeu"
+        - containerPort: 138
+          protocol: UDP
+          name: "upd-netbios"
+      volumeMounts:
+        - mountPath: "/mnt/coreStorage"
+          name: task-pv-storage
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: file-service
+spec:
+  type: NodePort
+  ports:
+  - port: 22
+    nodePort: 30003
+    protocol: TCP
+    name: "ssh"
+  - port: 445
+    nodePort: 445
+    protocol: TCP
+    name: "smbd"
+  - port: 139
+    nodePort: 139
+    protocol: TCP
+    name: "netbios"
+  - port: 135
+    nodePort: 135
+    protocol: TCP
+    name: "scm"
+  - port: 137
+    nodePort: 137
+    protocol: UDP
+    name: "netbeu"
+  - port: 138
+    nodePort: 138
+    protocol: UDP
+    name: "upd-netbios"
+  selector:
+    app: file-server
+
