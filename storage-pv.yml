@@ -20,15 +20,3 @@ spec:
           operator: In
           values:
           - kubemaster
----
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: local-claim
-spec:
-  accessModes:
-  - ReadWriteOnce
-  storageClassName: local-storage
-  resources:
-    requests:
-      storage: 1000Gi

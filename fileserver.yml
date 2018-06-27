@@ -1,46 +1,66 @@
-kind: Pod
+kind: PersistentVolumeClaim
 apiVersion: v1
+metadata:
+  name: local-claim
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: local-storage
+  resources:
+    requests:
+      storage: 100Gi
+
+---
+apiVersion: apps/v1 
+kind: Deployment
 metadata:
   name: file-server
   labels:
     app: file-server
 spec:
-  volumes:
-    - name: task-pv-storage
-      persistentVolumeClaim:
-       claimName: local-claim
-  containers:
-    - name: file-server
-      image: edwardkan/fileserver:latest
-      resources:
-        limits:
-          cpu: "1"
-          memory: "2Gi"
-        requests:
-          cpu: "1"
-          memory: "1Gi"
-      ports:
+  selector:
+    matchLabels:
+      app: file-server
+  template:
+    metadata:
+      labels:
+        app: file-server
+    spec:
+      containers:
+      - image:  edwardkan/fileserver:latest
+        name: file-server
+        resources:
+          limits:
+            memory: "1Gi"
+          requests:
+            memory: "512Mi"
+        ports:
         - containerPort: 22
-          protocol: TCP
-          name: "ssh-server"
+          protocol: TCP 
+          name: sshserver
         - containerPort: 445
-          protocol: TCP
-          name: "smbd"
+          protocol: TCP 
+          name: smbd
         - containerPort: 139
-          protocol: TCP
-          name: "netbios"
+          protocol: TCP 
+          name: netbios
         - containerPort: 135
-          protocol: TCP
-          name: "scm"
+          protocol: TCP 
+          name: scm
         - containerPort: 137
-          protocol: UDP
-          name: "netbeu"
+          protocol: UDP 
+          name: netbeu
         - containerPort: 138
-          protocol: UDP
-          name: "upd-netbios"
-      volumeMounts:
-        - mountPath: "/mnt/coreStorage"
-          name: task-pv-storage
+          protocol: UDP 
+          name: updnetbios
+        volumeMounts:
+        - name: task-pv-storage
+          mountPath: /mnt/coreStorage
+      volumes:
+      - name: task-pv-storage 
+        persistentVolumeClaim:
+          claimName: local-claim
+
 ---
 apiVersion: v1
 kind: Service
