@@ -11,6 +11,7 @@ spec:
   storageClassName: local-storage
   local:
     path: /mnt/storage/fileserver
+   #path: /mnt/storage
   nodeAffinity:
     required:
       nodeSelectorTerms:
